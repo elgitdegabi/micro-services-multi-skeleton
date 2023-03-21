@@ -1,0 +1,29 @@
+# server main properties
+server:
+  port: 9025
+
+spring:
+# DB properties
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+
+# JPA properties
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+# spring boot kafka properties
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST_NAME}:9092
+    queue:
+      execution:
+        name: execution-queue
+        group-id: ms-skeleton-execution-group-id
+    topic:
+      result:
+        name: result-topic
+        group-id: ms-skeleton-result-group-id
