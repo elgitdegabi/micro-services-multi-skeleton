@@ -1,9 +1,15 @@
+import logging
+
+from src.config.constants import CONSUME_NO_VALID_MESSAGE_ERROR
 from src.config.kafka_consumer import validation_consumer
 from . import producer_service
 from . import validation_service
 
+log = logging.getLogger(__name__)
+
 
 def execute_kafka_listener():
+    log.info('execute kafka lister - start')
     validation_consumer.poll(timeout_ms=1000)
     for message in validation_consumer:
         consume_validation_message(message)
@@ -11,19 +17,11 @@ def execute_kafka_listener():
 
 def consume_validation_message(message):
     try:
-        flow = message.headers[0][1].decode()
-        session_id = message.headers[1][1].decode()
-
-        if flow == 'USER':
-            validation_service.validate_user(message)
-            producer_service.publish_execution_message(flow, session_id, message)
-        elif flow == 'PRODUCT':
-            validation_service.validate_product(message)
-            producer_service.publish_execution_message(flow, session_id, message)
-        elif flow == 'ORDER':
-            validation_service.validate_order(message)
-            producer_service.publish_execution_message(flow, session_id, message)
+        log.info('consume validation message: {}', message)
+        if validation_service.validate(message):
+            producer_service.publish_execution_message(message)
         else:
-            raise ValueError("consume_validation_message - no valid message: ", message)
+            raise ValueError(CONSUME_NO_VALID_MESSAGE_ERROR, message)
     except ValueError:
-        producer_service.publish_fail_message(message)
+        log.error('consume validation message - error: {}', message)
+        producer_service.publish_fail_message(message, CONSUME_NO_VALID_MESSAGE_ERROR)

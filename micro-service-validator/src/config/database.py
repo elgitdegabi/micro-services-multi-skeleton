@@ -1,9 +1,10 @@
 import mysql.connector
+import os
 
 database = mysql.connector.connect(
-    host='localhost',
+    host=os.getenv('MYSQL_HOST'),
     port=3306,
-    user='user',
-    password='password',
-    database='local-db'
+    user=os.getenv('MYSQL_USER'),
+    password=os.getenv('MYSQL_PASSWORD'),
+    database=os.getenv('MYSQL_DATABASE'),
 )
